@@ -31,9 +31,17 @@ const Login = () => {
   }, [profile, navigate]);
 
   useEffect(() => {
-    supabase.from('centers').select('*').order('name').then(({ data }) => {
-      if (data) setCenters(data);
-    });
+    const fetchCenters = async () => {
+      try {
+        const { data, error } = await supabase.from('centers').select('*').order('name');
+        console.log('Centers fetch result:', { data, error });
+        if (data) setCenters(data);
+        if (error) console.error('Centers fetch error:', error);
+      } catch (err) {
+        console.error('Centers fetch exception:', err);
+      }
+    };
+    fetchCenters();
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
