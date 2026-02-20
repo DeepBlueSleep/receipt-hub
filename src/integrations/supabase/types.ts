@@ -113,8 +113,11 @@ export type Database = {
       }
       receipts: {
         Row: {
+          account_name: string | null
           amount: number
           center_id: string
+          company_name: string | null
+          company_xero_id: string | null
           description: string | null
           file_name: string | null
           file_url: string | null
@@ -133,8 +136,11 @@ export type Database = {
           xero_pushed_at: string | null
         }
         Insert: {
+          account_name?: string | null
           amount: number
           center_id: string
+          company_name?: string | null
+          company_xero_id?: string | null
           description?: string | null
           file_name?: string | null
           file_url?: string | null
@@ -153,8 +159,11 @@ export type Database = {
           xero_pushed_at?: string | null
         }
         Update: {
+          account_name?: string | null
           amount?: number
           center_id?: string
+          company_name?: string | null
+          company_xero_id?: string | null
           description?: string | null
           file_name?: string | null
           file_url?: string | null

@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, FileText, CheckCircle2, AlertCircle, Plus } from 'lucide-react';
 
 const UploadReceipt = () => {
   const { profile } = useAuth();
@@ -17,7 +18,18 @@ const UploadReceipt = () => {
     description: '',
     amount: '',
     receipt_date: '',
+    company_name: '',
+    company_xero_id: '',
+    account_name: '',
   });
+  const [isAddingNewCompany, setIsAddingNewCompany] = useState(false);
+
+  // TODO: Replace with Xero API contacts fetch when API key is configured
+  const xeroContacts = [
+    { id: 'xero-001', name: 'Acme Corp' },
+    { id: 'xero-002', name: 'GlobalTech Sdn Bhd' },
+    { id: 'xero-003', name: 'EduSupply Malaysia' },
+  ];
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -73,6 +85,9 @@ const UploadReceipt = () => {
         file_url: publicUrl,
         file_name: file.name,
         status: 'Pending',
+        company_name: form.company_name || null,
+        company_xero_id: form.company_xero_id || null,
+        account_name: form.account_name || null,
       });
 
       if (insertError) throw insertError;
@@ -150,6 +165,72 @@ const UploadReceipt = () => {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Provide details about this expense..."
                 rows={3}
+              />
+            </div>
+
+            {/* Company dropdown */}
+            <div className="space-y-2">
+              <Label>Company *</Label>
+              {isAddingNewCompany ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={form.company_name}
+                    onChange={(e) => setForm({ ...form, company_name: e.target.value, company_xero_id: '' })}
+                    placeholder="Enter new company name"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsAddingNewCompany(false);
+                      setForm({ ...form, company_name: '', company_xero_id: '' });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Select
+                  value={form.company_xero_id}
+                  onValueChange={(val) => {
+                    if (val === '__new__') {
+                      setIsAddingNewCompany(true);
+                      setForm({ ...form, company_name: '', company_xero_id: '' });
+                    } else {
+                      const contact = xeroContacts.find((c) => c.id === val);
+                      setForm({ ...form, company_xero_id: val, company_name: contact?.name || '' });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {xeroContacts.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__new__">
+                      <span className="flex items-center gap-1">
+                        <Plus className="w-3.5 h-3.5" /> Add new company
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* Account Name / Code */}
+            <div className="space-y-2">
+              <Label htmlFor="account_name">Account Name / Code</Label>
+              <Input
+                id="account_name"
+                value={form.account_name}
+                onChange={(e) => setForm({ ...form, account_name: e.target.value })}
+                placeholder="e.g. 200 - Sales, 400 - Advertising"
               />
             </div>
 
